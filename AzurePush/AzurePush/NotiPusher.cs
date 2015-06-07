@@ -19,7 +19,7 @@ namespace AzurePush
         public bool HasAndriod { get; set; }
 
         private readonly PushBroker pushBroker;
-        public NotiPusher(NotiConfig config)
+        public NotiPusher(NotiConfig config, string basePath)
         {
             pushBroker = new PushBroker();
             pushBroker.OnChannelException += OnChannelException;
@@ -28,18 +28,19 @@ namespace AzurePush
             pushBroker.OnNotificationFailed += OnNotificationFailed;
             pushBroker.OnServiceException += OnServiceException;
 
-            ConfigureIos(config);
+            ConfigureIos(config, basePath);
             ConfigureAndriod(config);
         }
 
-        void ConfigureIos(NotiConfig config)
+        void ConfigureIos(NotiConfig config, string basePath)
         {
             this.HasIos = config.HasIos;
             if (this.HasIos)
             {
                 try
                 {
-                    var bytes = File.ReadAllBytes(config.ApnCertFile);
+                    var path = Path.Combine(basePath, config.ApnCertFile);
+                    var bytes = File.ReadAllBytes(path);
                     var setting = new ApplePushChannelSettings(config.ApnProduction, bytes, config.ApnCertPassword);
                     pushBroker.RegisterAppleService(setting);
                 }
